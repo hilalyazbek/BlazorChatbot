@@ -1,0 +1,41 @@
+﻿@page "/"
+@rendermode InteractiveServer
+@using BlazorChatbot.Services
+@using System.Text
+@inject IChatService IChatService
+
+<PageTitle>Home</PageTitle>
+
+<h1>Open AI Chatbot</h1>
+
+<div>
+    <textarea disabled="disabled" class="chatboxresult" @bind="_conversationHistory"></textarea>
+</div>
+<div>
+    <input @bind="_inputMessage" placeholder="Chat with me" class="chatboxinput" />
+    <button class="btn btn-primary" @onclick="SendChat">Click me</button>
+</div>
+
+@code
+{
+    private string? _conversationHistory = string.Empty;
+    private string? _inputMessage = string.Empty;
+    private StringBuilder? _conversation = new StringBuilder();
+
+    private async Task SendChat()
+    {
+        var completions = await IChatService.ChatWithOpenAI(_inputMessage);
+
+        _conversation.AppendLine("Question: " + _inputMessage);
+
+        var answer = completions.Choices[0].Message.Content;
+
+        _conversation.AppendLine("Answer: " + answer);
+        _conversation.AppendLine();
+
+        _conversationHistory = _conversation.ToString();
+
+        _inputMessage = string.Empty;
+
+    }
+}
